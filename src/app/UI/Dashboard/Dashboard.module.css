@@ -1,0 +1,25 @@
+.container{
+    display:flex;
+    align-items: center;    
+    background: #E1E4FD;
+    max-height: 100vh;
+    
+    
+}
+
+.menu {
+    flex:1;
+    margin-top: 5%;
+    margin-bottom: 40px;
+    color: #E1E4FD;
+    justify-content: center;
+}
+
+.content {
+    flex:4
+    
+}
+
+.btn:hover{
+
+}

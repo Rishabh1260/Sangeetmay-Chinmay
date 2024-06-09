@@ -1,32 +1,31 @@
-'use client'
+
 
 import React, { useEffect, useState, useContext } from 'react';
 import Image from 'next/image';
-import InputField from '@/components/InputField';
+
 import dynamic from "next/dynamic"
 import {googleProvider,app} from "../services/firebase";
 import { signInWithPopup} from 'firebase/auth';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/router'
 import addUsertoFirestore from '../services/userController'
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber} from 'firebase/auth';  
+import '@/app/globals.css';
 
 
-import {useRecoilValue, useRecoilState} from 'recoil';
 
-import {userAtom, userXAtom} from '@/store/atoms/user'
+
 
 const Phone = dynamic(() => import("@/components/Phone"), {ssr : false}); 
 
 const Login  = () => {
 
   const router = useRouter();
+
   const auth = getAuth();
-  const phoneUser = useRecoilValue(userAtom);
+  
 
-  const [useruid, setUserUid] = useRecoilState(userXAtom);
+  const [user, setUser] = useState('');
 
-
-  console.log("user uid form login page : ",phoneUser)
 
 
 
@@ -38,15 +37,26 @@ const Login  = () => {
       console.log("Login successful");
       
       // sessionStorage.setItem('user', JSON.stringify(user));
-      setUserUid(user.uid);
+      setUser(user);
+     
 
       if(user.email === 'sangeetmaychinmay@gmail.com'){
         router.push('/AdminPanel');
       }
       else{
-        router.push('/Form');
+        console.log("user : ",user);
+        
+
+        router.push({
+          pathname: '/form',
+          query: {
+            uid: user.uid,
+            displayName: user.displayName,
+            Email: user.email,
+          },// Pass user object as a query parameter
+        });
       }
-  
+      
     })
     .catch((error) => {
       console.error("Login error:", error);
@@ -60,12 +70,12 @@ const Login  = () => {
 
 
   return (
-    <div className="flex h-screen relative ">
+    <div className="flex h-screen w-screen relative ">
    
       <img
         src="/Background.jpg" 
         alt="Background"
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-screen h-screen object-cover"
       />
       
       <div className="w-1/2  flex items-center justify-center relative">
@@ -75,7 +85,7 @@ const Login  = () => {
       <div className="w-1/2 bg-custom-gray flex items-center justify-center ">
        
 
-        <div className="w-auto h-auto p-12 bg-[#5782c147] rounded-3xl  border-solid  backdrop-blur-[25px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(25px)_brightness(100%)] [border-image:linear-gradient(to_bottom,rgba(88,130,193,0.49),rgba(88,130,193,0.11))_1]">
+        <div className="w-10/12 h-5/6 p-12 bg-[#5782c147] rounded-3xl  border-solid  backdrop-blur-[25px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(25px)_brightness(100%)] [border-image:linear-gradient(to_bottom,rgba(88,130,193,0.49),rgba(88,130,193,0.11))_1]">
           <h2 className="text-2xl m item-center justify-center font-light text-black" >Login</h2>
           <p className='text-[12px]  font-thin text-black'>Welcome to SangeetmayChinmay </p>
           
@@ -110,3 +120,5 @@ const Login  = () => {
 };
 
 export default Login;
+
+

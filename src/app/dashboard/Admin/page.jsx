@@ -1,5 +1,4 @@
-'use client'
-
+'use client';
 
 import React from "react";
 import '@/app/globals.css';
@@ -8,10 +7,9 @@ import {db} from '@/services/firebase';
 import {collection, getDocs,doc, setDoc  } from 'firebase/firestore'
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@nextui-org/react"; 
 import Modalx from '@/components/Modal.jsx';
-import {Button} from "@nextui-org/react";
-import toast, { Toaster } from 'react-hot-toast';
 
-import Searchbar from "./Searchbar";
+
+import { Context } from '@/app/page';
 
 
 
@@ -35,67 +33,44 @@ function AdminPanel() {
   const [trackingId, setTrackingId] = useState(""); 
   const[userdata, setUserdata] = useState([]); 
   
-  
-  
+
+
   
   const findNameById = (id) => {
     const user = userdata.find((user) => user.id === id);
     
-    return user ? user.Name.firstName : 'Name not found';
+    return user ? user.firstName : 'Name not found';
   };
+  
   const username = findNameById(userId[0]);
   
-
   
   
-
-
-  // useEffect(() => {
-  //   async function fetchDataFromFirestore(userUid){
-  //     const docRef = doc(collection(db, "users"), userUid);
-  //     const docSnap = await getDocs(docRef);
-    
-  //     if (docSnap.exists()) {
-        
-  //       return console.log("RETURN SNAP",docSnap.data().trackingId); // returns trackingId of the user
-  //     } else {
-  //       console.log("No such document!");
-  //     }
-  //   }    
-  // },[])
- 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filteredData, setFilteredData] = useState("")
-
-
-  const SearchProps = (value) => {
-    setSearchTerm(value);
-  };
-
   
-  useEffect(() => {
-    setUserdata(
-      userdata.filter((item) => {
-        const name = `${item.Name.firstName} ${item.Name.lastName}`.toLowerCase();
-        const phoneNumber = item.phone.toString().toLowerCase();
-        return name.includes(searchTerm.toLowerCase()) || phoneNumber.includes(searchTerm.toLowerCase());
-      })
-    );
-  
-  }, [searchTerm]);
-
   useEffect(() =>{
-
     async function fetchData(){
       const data = await fetchDataFromFirestore();
-      const limitedData = data.slice(0, 100); // Limit the data to 100 values
-      setUserdata(limitedData);
-    
+      setUserdata(data);
       
       setIsLoading(false);
     }
     fetchData();
-  },[])  
+  },[])   
+
+  useEffect(() => {
+    async function fetchDataFromFirestore(userUid){
+      const docRef = doc(collection(db, "users"), userUid);
+      const docSnap = await getDocs(docRef);
+    
+      if (docSnap.exists()) {
+        
+        return console.log("RETURN SNAP",docSnap.data().trackingId); // returns trackingId of the user
+      } else {
+        console.log("No such document!");
+      }
+    }    
+  },[])
+ 
   
 
   
@@ -104,7 +79,7 @@ function AdminPanel() {
   async function addTrackingToFireStore(trackingId){
     try {
       
-      console.log("Entered tracking id inside the addData function : ",trackingId.toString())
+      console.log("entered tracking id inside the addData function : ",trackingId.toString())
       
       const userDocRef = doc(db, "users", userId.toString());
 
@@ -121,28 +96,22 @@ catch (error) {
   return false;
 }
 }
- 
+      
 
-
-
-const handleTrackingId = async (value) => {
+const handleTrackingId = async(value) => {
+  // e.preventDefault();  
   setTrackingId(value);
 
-  const added = await addTrackingToFireStore(value);
+const added = await addTrackingToFireStore(value);
 
-  if (added) {
-    toast.success('TrackingId updated!')
-    // Fetch updated data from Firestore and update the userdata state
-    const updatedData = await fetchDataFromFirestore();
-    setUserdata(updatedData);
-  } else {
-    toast.error("Error adding tracking ID to Firestore", error)
-  }
-};
+if(added){
+ alert("User Registered Successfully");
+}else{
+  alert("User Registration Failed");
+}
+}
 
   
-
-
 
 
  const [isLoading, setIsLoading] = React.useState(true);
@@ -157,49 +126,34 @@ const handleclick = () => {
 }
 
 
-
-const mapDataToListItems = (data) => {
-  return data.map(item => (
-    <li key={item.id}>{item.name}</li>
-  ));
-};
-
-
   return (
 
-    <>
-    <div className="flex flex-col justify-center items-center  h-screen w-screen  custom-gradient-black">
-
-<Searchbar props={SearchProps}/>
-
-
-     <Toaster toastOptions={{ duration: 5000 }} position="bottom-right" />
+    // <div className="flex items-center justify-center h-screen w-screen flex-direction-column custom-gradient-black">
     <div className=" h-4/5 w-4/5 main-div  backdrop-blur-2xl custom-gradient-grey bg-gray-800 rounded-lg">
    
 
 
     <Table 
      isHeaderSticky
-     aria-label="Example table with dynamic content"
+    
   
      classNames={{
        
        base: "overflow-y-auto",
-       wrapper: "custom-gradient-grey p-0 pt-2 pl-1",
-       table: "max-h-[720px]  custom-gradient-grey",
-            th: "p-3 bg-zinc-900/opacity-0 rounded-[5px] shadow-inner border border-zinc-800 backdrop-blur-[22.57px]"
+       wrapper: "custom-gradient-grey",
+       table: "min-h-[720px]  custom-gradient-grey",
        
      }}
      
      
     >
-  <TableHeader className="bg-transparent">
+  <TableHeader className="bg-transparent ">
     
-      <TableColumn className="" >Name</TableColumn>
-      <TableColumn className="" >Contact</TableColumn>
-      <TableColumn className="" >Address</TableColumn>
-      <TableColumn className="" >Book</TableColumn>
-      <TableColumn className="">Status</TableColumn>
+      <TableColumn className="bg-[#1c1b1b]" >Name</TableColumn>
+      <TableColumn className="bg-[#1c1b1b]" >Contact</TableColumn>
+      <TableColumn className="bg-[#1c1b1b]" >Address</TableColumn>
+      <TableColumn className="bg-[#1c1b1b]" >Book</TableColumn>
+      <TableColumn className="bg-[#1c1b1b]">Status</TableColumn>
     
   </TableHeader>
   <TableBody 
@@ -213,50 +167,59 @@ const mapDataToListItems = (data) => {
   {userdata.map((item, index) => (
       <TableRow 
       isStriped aria-label="Example static collection table"
-      className="text-white " key={item.id} >
-        <TableCell className="m-2 align-top">
+      className="text-white" key={item.id} >
+        <TableCell className="m-2 flex items-center">
           {!item.TrackingId && (
-            <div className="red-dot ring-opacity-70 h-1.5 w-1.5 rounded-3xl "></div>
+            <div className="red-dot ring-opacity-70 h-1.5 w-1.5 rounded-3xl"></div>
           )}
-           {item.Name.firstName} {item.Name.lastName}
+          {item.firstName + " " + item.lastName}
         </TableCell >
-        <TableCell className="align-top">{item.phone}</TableCell>
-        <TableCell className="align-top" >{item.Address.streetAddress + ", " + item.Address.city + ", " + item.Address.state + " - " + item.Address.zipCode}</TableCell>
-        <TableCell className="align-top"> {item?.books?.map((book, index) => (
+        <TableCell >{item.phone}</TableCell>
+        <TableCell >{item.streetAddress + ", " + item.city + ", " + item.state + " - " + item.zipCode}</TableCell>
+        <TableCell > {item?.books?.map((book, index) => (
     <span key={index} className="border-cyan-900">
       {book.language} - {book.type} x {book.qty} {index < item.books.length - 1 ? ', ' : ''} <br />
     </span>
   ))}</TableCell>
-        <TableCell className="align-top"
+        <TableCell 
            isLoading={isLoading}>
-          {userId[item.id] ? (
+          {userId[index] ? (
             <span className="loading loading-dots loading-lg"></span>
           ) : (
             <div >
               {item.TrackingId ? (
                 <p >{item.TrackingId}</p>
               ) :  (
-                <Button
-                  className="update-btn"
+                <button
+                  className="update-btn  "
                   key={index}
                   id={item.id}
+                  // onClick={() =>{ 
+                  //   setIsEditable((prevEditable) => {
+                  //     const newEditable = [...prevEditable]; // Create a copy of the array
+                  //     newEditable[index] = true; // Set the specific index to true
+                  //     return newEditable;
+                  //   });
+                  // }}
                   onClick={() => {
                     // handleChange(); // Assuming handleChange is a function defined elsewhere
-                    handleclick(); // Assuming handleclick is a function defined elsewhere
                     setUserid((prevEditable) => {
                       const newEditable = [...prevEditable]; // Create a copy of the array
                       newEditable[item.id] = true;
-                      
                       const value = [item.id]// Set the specific index to true
                       return value;
                     });
+                    setTimeout(() => {
+                        handleclick(); // Assuming handleclick is a function defined elsewhere
+                      }, 0);
+                      
                 }}
                 
                   // onOpenChange={onOpenChange} 
                   value={trackingId}
                   >
                   Update
-                </Button>
+                </button>
               )}
             </div>
           )}
@@ -269,8 +232,7 @@ const mapDataToListItems = (data) => {
 <Modalx  person={username} onsubmitID={handleTrackingId}  />
 
     </div>
-  </div>
-  </>
+  // </div>
     
   );
 }
