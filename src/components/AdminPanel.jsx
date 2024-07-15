@@ -34,10 +34,12 @@ function AdminPanel() {
   const [userId, setUserid] = useState("");
   const [trackingId, setTrackingId] = useState(""); 
   const[userdata, setUserdata] = useState([]); 
+  const [filteredData, setFilteredData] = useState([])
   
   
   
   
+
   const findNameById = (id) => {
     const user = userdata.find((user) => user.id === id);
     
@@ -59,13 +61,12 @@ function AdminPanel() {
         
   //       return console.log("RETURN SNAP",docSnap.data().trackingId); // returns trackingId of the user
   //     } else {
-  //       console.log("No such document!");
+  //     
   //     }
   //   }    
   // },[])
  
   const [searchTerm, setSearchTerm] = useState("")
-  const [filteredData, setFilteredData] = useState("")
 
 
   const SearchProps = (value) => {
@@ -74,21 +75,24 @@ function AdminPanel() {
 
   
   useEffect(() => {
-    setUserdata(
+    setFilteredData(
       userdata.filter((item) => {
         const name = `${item.Name.firstName} ${item.Name.lastName}`.toLowerCase();
         const phoneNumber = item.phone.toString().toLowerCase();
         return name.includes(searchTerm.toLowerCase()) || phoneNumber.includes(searchTerm.toLowerCase());
       })
     );
+
   
   }, [searchTerm]);
+
+
 
   useEffect(() =>{
 
     async function fetchData(){
       const data = await fetchDataFromFirestore();
-      const limitedData = data.slice(0, 100); // Limit the data to 100 values
+      const limitedData = data.slice(0, 100); // Limit the userdata to 100 values
       setUserdata(limitedData);
     
       
@@ -104,7 +108,7 @@ function AdminPanel() {
   async function addTrackingToFireStore(trackingId){
     try {
       
-      console.log("Entered tracking id inside the addData function : ",trackingId.toString())
+     
       
       const userDocRef = doc(db, "users", userId.toString());
 
@@ -113,16 +117,16 @@ function AdminPanel() {
         TrackingId: trackingId,
       },
       { merge: true });
-console.log("Document written with ID: ", userDocRef.id);
+
 return true;
 }
 catch (error) {
-  console.log("Error Adding Document",error);
+
   return false;
 }
 }
  
-
+console.log(userdata)
 
 
 const handleTrackingId = async (value) => {
@@ -133,7 +137,9 @@ const handleTrackingId = async (value) => {
   if (added) {
     toast.success('TrackingId updated!')
     // Fetch updated data from Firestore and update the userdata state
-    const updatedData = await fetchDataFromFirestore();
+    const sample = await fetchDataFromFirestore();
+    const updatedData = sample.slice(0, 100);
+    console.log("updated *",updatedData)
     setUserdata(updatedData);
   } else {
     toast.error("Error adding tracking ID to Firestore", error)
@@ -145,24 +151,21 @@ const handleTrackingId = async (value) => {
 
 
 
- const [isLoading, setIsLoading] = React.useState(true);
+ const [isLoading, setIsLoading] = useState(true);
 
 
 
 // const handleTrackingId = (value) => {
 //   setTrackingId(value);
 // };
+
 const handleclick = () => {
   document.getElementById('my_modal_5').showModal()
 }
 
 
 
-const mapDataToListItems = (data) => {
-  return data.map(item => (
-    <li key={item.id}>{item.name}</li>
-  ));
-};
+
 
 
   return (
@@ -210,7 +213,7 @@ const mapDataToListItems = (data) => {
             
   >
    
-  {userdata.map((item, index) => (
+  {filteredData.map((item, index) => (
       <TableRow 
       isStriped aria-label="Example static collection table"
       className="text-white " key={item.id} >
