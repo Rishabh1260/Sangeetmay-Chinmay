@@ -75,16 +75,19 @@ function AdminPanel() {
 
   
   useEffect(() => {
-    setFilteredData(
-      userdata.filter((item) => {
-        const name = `${item.Name.firstName} ${item.Name.lastName}`.toLowerCase();
-        const phoneNumber = item.phone.toString().toLowerCase();
-        return name.includes(searchTerm.toLowerCase()) || phoneNumber.includes(searchTerm.toLowerCase());
-      })
-    );
-
+    if (searchTerm.trim() === "") {
+      setFilteredData(userdata);
+    } else {
+      setFilteredData(
+        userdata.filter((item) => {
+          const name = `${item.Name.firstName} ${item.Name.lastName}`.toLowerCase();
+          const phoneNumber = item.phone.toString().toLowerCase();
+          return name.includes(searchTerm.toLowerCase()) || phoneNumber.includes(searchTerm.toLowerCase());
+        })
+      );
+    }
+  }, [searchTerm, userdata]);
   
-  }, [searchTerm]);
 
 
 
@@ -217,12 +220,13 @@ const handleclick = () => {
       <TableRow 
       isStriped aria-label="Example static collection table"
       className="text-white " key={item.id} >
-        <TableCell className="m-2 align-top">
-          {!item.TrackingId && (
-            <div className="red-dot ring-opacity-70 h-1.5 w-1.5 rounded-3xl "></div>
-          )}
-           {item.Name.firstName} {item.Name.lastName}
-        </TableCell >
+       <TableCell className="m-2 align-top flex items-center">
+  {!item.TrackingId && (
+    <div className="red-dot ring-opacity-70 h-1.5 w-1.5 rounded-3xl mr-2"></div>
+  )}
+  {item.Name.firstName} {item.Name.lastName}
+</TableCell>
+
         <TableCell className="align-top">{item.phone}</TableCell>
         <TableCell className="align-top" >{item.Address.streetAddress + ", " + item.Address.city + ", " + item.Address.state + " - " + item.Address.zipCode}</TableCell>
         <TableCell className="align-top"> {item?.books?.map((book, index) => (
